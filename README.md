@@ -108,7 +108,10 @@ count as correct, or `"stays"` for a label the run must not file. The
 map encodes opinions about the system under test, so it lives with
 that system, not here. The Small Business System's map is in the
 johnnydecimal.com repo under `tests/fixtures/moving-in/`, next to a
-pinned copy of this key.
+pinned copy of this key. A change to the generator changes the mess
+for every seed, so it rewrites the committed key. Copy the new key
+over the pinned one, or that repo scores against a mess that no
+longer exists.
 
 ## Tests
 
