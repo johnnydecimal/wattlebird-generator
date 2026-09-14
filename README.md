@@ -79,8 +79,26 @@ supplier, customer and amount is invented.
 `answer-key.csv` has one row per generated file. The `intended home`
 column holds the file's label: Suppliers & purchasing, Sales & orders,
 Money, tax, & accounting, Products & stock, Marketing & website, Business
-admin, Personal (not business), or Junk / discardable. A scoring map from
-label to system category belongs with the system under test, not here.
+entity & people, Premises, equipment, & getting around, Technology &
+online, Travel & events, Business admin (general), Personal (not
+business), or Junk / discardable. The general label covers only the
+weekly to-do notes, which belong to no one category.
+
+## Scoring
+
+```sh
+python3 score.py answer-key.csv /path/to/filed-system sbs-map.csv
+```
+
+`score.py` walks the filed system, or reads a text file of `ls -R`
+output, and matches each key file by basename. A map CSV says which
+two-digit categories count as correct for each label. `sbs-map.csv` is
+the map for the Small Business System. Write one map per system under
+test. The script also reports files parked in `.09 Archive` IDs and
+files it cannot find, and it lists every wrong placement.
+
+The key holds one row per copy, and duplicates share a basename, so a
+placed name scores every key row with that name.
 
 ## If the agent complains
 

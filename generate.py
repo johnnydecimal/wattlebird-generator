@@ -105,7 +105,11 @@ H_ORDERS = "Sales & orders"
 H_MONEY = "Money, tax, & accounting"
 H_PRODUCT = "Products & stock"
 H_MARKETING = "Marketing & website"
-H_ADMIN = "Business admin"
+H_ADMIN = "Business admin (general)"
+H_PEOPLE = "Business entity & people"
+H_PREMISES = "Premises, equipment, & getting around"
+H_TECH = "Technology & online"
+H_TRAVEL = "Travel & events"
 H_PERSONAL = "Personal (not business)"
 H_JUNK = "Junk / discardable"
 
@@ -509,7 +513,7 @@ def email_pool(rng):
         ("noreply@domains.example", OWNER_EMAIL,
          "Your domain wattlebirdpaper.com.au renews soon",
          "Your domain renews automatically on the date shown in your "
-         "dashboard. No action needed.", H_ADMIN),
+         "dashboard. No action needed.", H_TECH),
         (f"owner@{rng.choice(['papernest', 'inkwellco']).lower()}"
          ".example", SHOP_EMAIL,
          "Wholesale reorder",
@@ -518,29 +522,29 @@ def email_pool(rng):
         ("priya.n@example.com", OWNER_EMAIL,
          f"Shifts for {rng.choice(['March', 'June', 'Sept', 'Nov'])}",
          "Hi Mel,\n\nI can do Tues/Thurs plus market Saturdays except "
-         "the long weekend.\n\nPriya", H_ADMIN),
+         "the long weekend.\n\nPriya", H_PEOPLE),
         (LANDLORD_EMAIL, OWNER_EMAIL,
          f"{STUDIO} - routine inspection",
          f"Hi Mel,\n\nRoutine inspection of {STUDIO} is booked for "
          f"{a_date(rng, 2023, 2026)} between 10 and 12. Please make sure "
-         "we have access.\n\nFenwick St PM", H_ADMIN),
+         "we have access.\n\nFenwick St PM", H_PREMISES),
         (OWNER_EMAIL, LANDLORD_EMAIL,
          "Leak under the sink unit 7",
          "Hi,\n\nThe pipe under the kitchenette sink is dripping again. "
          "Second time this year. Bucket is under it. Can you send the "
-         f"plumber?\n\n{OWNER}", H_ADMIN),
+         f"plumber?\n\n{OWNER}", H_PREMISES),
         (f"hello@{TRADERS_GROUP.split()[0].lower()}traders.example",
          SHOP_EMAIL,
          "Late night trading - Thursdays in December",
          "Hi traders,\n\nThe street will run late-night trading every "
          "Thursday in December. Reply if you want your studio on the "
-         "map.\n\nFenwick St Traders", H_ADMIN),
+         "map.\n\nFenwick St Traders", H_PREMISES),
         ("security-noreply@accounts.example", OWNER_EMAIL,
          "Suspicious sign-in attempt on your account",
          "We blocked a sign-in from a new device. If this was not you, "
          "reset your password now: http://accounts.example.verify-login."
          "example/reset\n\n(Mel - this looks fake, the link is wrong. "
-         "Did not click. P)", H_ADMIN),
+         "Did not click. P)", H_TECH),
         (SUPPLIERS[4][2], OWNER_EMAIL,
          "Site maintenance window Sunday night",
          "Hi Mel,\n\nWe will upgrade the theme and the shipping app on "
@@ -605,11 +609,11 @@ def note_pool(rng):
          f"# Mentor session\n\n- {GUILD} mentor: stop discounting, "
          "raise wholesale minimum\n- 'you are a brand, not a printer'\n"
          f"- homework: write the one-page plan, send by {d[:7]}\n",
-         H_ADMIN),
+         H_PEOPLE),
         (f"studio to do {d}.txt",
          f"- fix the wobbly shelf near the door\n- new globe in the "
          "packing area (LED, warm)\n- ask landlord about the bike rack\n"
-         f"- pest guy? saw a moth near the {pname} stock\n", H_ADMIN),
+         f"- pest guy? saw a moth near the {pname} stock\n", H_PREMISES),
     ]
     return rng.choice(pool)
 
@@ -630,7 +634,7 @@ def hero_notes():
          "a proof this time.\n", H_SUPPLIERS),
         ("priya roster.txt",
          "Tues 10-3, Thurs 10-3, market Sats.\nAway: school holidays "
-         "second week.\nPay run: Wednesdays.\n", H_ADMIN),
+         "second week.\nPay run: Wednesdays.\n", H_PEOPLE),
         ("packaging cost comparison.md",
          "# Mailers\n\n| Option | Unit | Notes |\n|---|---|---|\n"
          "| PackRight rigid A5 | $0.62 | current |\n"
@@ -683,11 +687,11 @@ def hero_notes():
          H_PERSONAL),
         ("passwords OLD do not use.txt",
          "moved everything to the password manager (finally).\n"
-         "this file kept only so I remember I did it.\n", H_ADMIN),
+         "this file kept only so I remember I did it.\n", H_TECH),
         ("insurance renewal todo.txt",
          "Product & public liability renews in June.\nGet a second "
          "quote this year. Ask about the market stall cover.\n",
-         H_ADMIN),
+         H_PEOPLE),
         ("new range brief for illustrator.md",
          "# Bird series brief\n\n6 designs: wattlebird (obviously), "
          "fairy-wren, galah, kookaburra, magpie, rosella.\n"
@@ -701,7 +705,7 @@ def hero_notes():
         ("lease renewal email draft.md",
          "# Draft to landlord\n\nHappy to renew the studio 12 months. "
          "Push back on the 8% increase — comparable units listed at "
-         "less. Settle at 4-5%.\n", H_ADMIN),
+         "less. Settle at 4-5%.\n", H_PREMISES),
     ]
 
 
@@ -722,7 +726,7 @@ def docx_pool(rng):
          ["Dear Property Manager,",
           "Please find attached our renewal for the studio unit. We "
           "note the proposed increase and refer to comparable listings.",
-          f"Regards, {OWNER}"], H_ADMIN),
+          f"Regards, {OWNER}"], H_PREMISES),
         ("product descriptions draft.docx",
          [f"{p[1]}: {rng.choice(['Lay-flat binding.', 'Recycled stock.', 'Prints of original artwork.'])}"
           for p in rng.sample(PRODUCTS, k=4)], H_PRODUCT),
@@ -735,7 +739,7 @@ def docx_pool(rng):
          ["Small business grant application - draft.",
           f"{SHOP} employs 1.4 FTE and manufactures locally.",
           "Funds would purchase a creasing machine to bring card "
-          "finishing in-house."], H_ADMIN),
+          "finishing in-house."], H_MONEY),
     ]
     name, paragraphs, home = rng.choice(pool)
     return name, build_docx(paragraphs), home
@@ -747,16 +751,16 @@ def admin_pdf_pool(rng):
         (f"insurance certificate {d[:4]}.pdf",
          ["CERTIFICATE OF CURRENCY",
           f"Insured: {SHOP}", "Product & Public Liability $10,000,000",
-          f"Period: {d[:4]}-07-01 to {int(d[:4]) + 1}-06-30"], H_ADMIN),
+          f"Period: {d[:4]}-07-01 to {int(d[:4]) + 1}-06-30"], H_PEOPLE),
         ("studio lease excerpt.pdf",
          ["COMMERCIAL LEASE (EXCERPT)",
           f"Tenant: {SHOP}", "Premises: Unit 7, 12 Fenwick St",
-          "Term: 12 months with option"], H_ADMIN),
+          "Term: 12 months with option"], H_PREMISES),
         (f"asic renewal {d[:4]}.pdf",
          ["ANNUAL COMPANY STATEMENT",
           f"Company: Wattlebird Paper Co Pty Ltd",
           "Review fee payable. Check details and pay by the due "
-          "date."], H_ADMIN),
+          "date."], H_PEOPLE),
         (f"receipt bunnings {d}.pdf",
          ["TAX RECEIPT", "Shelving unit x2, cable ties, hooks",
           f"Total ${money(rng, 40, 260):.2f} inc GST"], H_MONEY),
@@ -812,44 +816,44 @@ def premises_pool(rng):
         ])
         log_rows.append([a_date(rng, int(d[:4]), int(d[:4])), *trip])
     pool = [
-        (f"car logbook {fy}.xlsx", build_xlsx(log_rows), H_ADMIN),
+        (f"car logbook {fy}.xlsx", build_xlsx(log_rows), H_PREMISES),
         (f"PO Box renewal {d[:4]}.pdf",
          build_pdf(["PO BOX RENEWAL NOTICE", f"Customer: {SHOP}",
                     "PO Box 214, Fenwick St LPO",
                     f"Renewal fee ${money(rng, 140, 190):.2f} inc GST",
                     "Renew before the expiry date to keep the box."]),
-         H_ADMIN),
+         H_PREMISES),
         (f"parking infringement {d}.pdf",
          build_pdf(["INFRINGEMENT NOTICE", COUNCIL,
                     "Offence: parked in loading zone longer than 30 min",
                     f"Location: Fenwick St", f"Penalty ${rng.choice([99, 121, 165])}.00",
-                    "Pay or appeal within 28 days."]), H_ADMIN),
+                    "Pay or appeal within 28 days."]), H_PREMISES),
         ("studio move checklist.md",
          "# Move: spare room -> Fenwick St\n\n- [x] sign lease\n"
          "- [x] bond (get receipt from PM)\n- [x] power connected\n"
          "- [ ] redirect mail, or just get the PO box\n"
          "- [ ] tell Corella + PackRight the new delivery address\n"
-         "- [ ] shelving. lots of shelving.\n", H_ADMIN),
+         "- [ ] shelving. lots of shelving.\n", H_PREMISES),
         ("studio fitout plan.md",
          "# Fitout\n\n- packing bench along the long wall, 2.4m\n"
          "- 4x shelving bays for stock, labelled by SKU\n"
          "- photo corner near the window, white wall\n"
          "- landlord OK with shelves fixed to wall if we patch on exit\n",
-         H_ADMIN),
+         H_PREMISES),
         ("alarm and keys.txt",
          "Alarm code: not written down anywhere, ask Mel.\n"
          "Keys: Mel x2, Priya x1, PM has the master.\n"
          "Alarm company: call the number on the panel sticker.\n",
-         H_ADMIN),
+         H_PREMISES),
         ("cleaning roster.txt",
          "Mon: Mel - bins out, bench wipe\nThu: Priya - floor, bathroom\n"
-         "Monthly: windows (photo wall must be spotless)\n", H_ADMIN),
+         "Monthly: windows (photo wall must be spotless)\n", H_PREMISES),
         (f"studio inspection report {d}.pdf",
          build_pdf(["ROUTINE INSPECTION REPORT", LANDLORD,
                     f"Premises: {STUDIO}", f"Tenant: {SHOP}",
                     "Condition: good. Minor: shelving fixed to wall, "
                     "tenant to patch on exit.",
-                    "Next inspection in 6 months."]), H_ADMIN),
+                    "Next inspection in 6 months."]), H_PREMISES),
         (f"electricity bill studio {d[:7]}.pdf",
          build_pdf(["TAX INVOICE - Southern Volt Energy",
                     f"Supply address: {STUDIO}",
@@ -861,12 +865,12 @@ def premises_pool(rng):
                      "Council has approved the street planters. Late "
                      "night trading dates are confirmed for December.",
                      "New member: a ceramics studio at number 18."]),
-         H_ADMIN),
+         H_PREMISES),
         ("label printer setup.md",
          "# Label printer\n\n- 4x6 thermal, shares the desk with the "
          "laptop\n- driver from the vendor site, NOT the app store one\n"
          "- Shopify shipping labels print straight to it\n"
-         "- rolls from Officeworks, 500/roll\n", H_ADMIN),
+         "- rolls from Officeworks, 500/roll\n", H_PREMISES),
     ]
     return rng.choice(pool)
 
@@ -886,7 +890,7 @@ def tech_pool(rng):
         stat_rows.append([c, sent, rng.randint(200, sent // 2),
                           rng.randint(10, 120), rng.randint(0, 9)])
     pool = [
-        ("software subscriptions.xlsx", build_xlsx(sub_rows), H_ADMIN),
+        ("software subscriptions.xlsx", build_xlsx(sub_rows), H_TECH),
         (f"newsletter stats {d[:7]}.csv",
          "\n".join(",".join(str(v) for v in r) for r in stat_rows) + "\n",
          H_MARKETING),
@@ -897,46 +901,46 @@ def tech_pool(rng):
          "TXT    @     v=spf1 include:_spf.google.com ~all\n"
          f"\nregistrar: {REGISTRAR_EMAIL.split('@')[1]}, renews "
          f"{rng.randint(1, 28)} {rng.choice(['Mar', 'Aug', 'Nov'])}\n",
-         H_ADMIN),
+         H_TECH),
         ("shopify apps installed.md",
          "# Shopify apps\n\n- shipping calculator (Redback set up)\n"
          "- reviews widget - free tier\n- Klaviyo sync\n"
          "- pre-order app - TRIAL, cancel before the 30 days\n",
-         H_ADMIN),
+         H_TECH),
         (f"laptop receipt {d}.pdf",
          build_pdf(["TAX INVOICE - Byte Bros Computers",
                     f"Sold to: {SHOP}", "1x 13in laptop, 16GB, 512GB",
                     "1x USB-C dock", f"Total ${money(rng, 1900, 2600):.2f}"
                     " inc GST", "Warranty: 12 months manufacturer"]),
-         H_ADMIN),
+         H_TECH),
         ("2FA backup codes DO NOT SHARE.txt",
          "Backup codes for the Shopify and Google logins.\n\n"
          "MOVED to the password manager. This copy is void, the codes "
-         "were regenerated.\n", H_ADMIN),
+         "were regenerated.\n", H_TECH),
         ("instagram locked out notes.md",
          "# IG lockout\n\n- got the 'unusual activity' screen after the "
          "laptop swap\n- recovery went to the OLD phone number\n"
          "- fixed via email code, then updated the number\n"
          "- TODO: turn on 2FA with the authenticator, not SMS\n",
-         H_ADMIN),
+         H_TECH),
         ("time machine backup log.txt",
          "\n".join(f"{a_date(rng, int(d[:4]), int(d[:4]))} backup "
                    f"{rng.choice(['completed', 'completed', 'skipped - disk not connected'])}"
-                   for _ in range(rng.randint(5, 12))) + "\n", H_ADMIN),
+                   for _ in range(rng.randint(5, 12))) + "\n", H_TECH),
         ("laptop setup checklist.md",
          "# New laptop\n\n- [x] Shopify, Xero, Canva logins\n"
          "- [x] label printer driver (see setup note)\n"
          "- [ ] Illustrator - licence is still on the old laptop\n"
          "- [x] Backblaze\n- [ ] wipe the old one before Priya takes it\n",
-         H_ADMIN),
+         H_TECH),
         (f"domain renewal receipt {d[:4]}.pdf",
          build_pdf(["RECEIPT", "wattlebirdpaper.com.au - 2 year renewal",
                     f"Amount ${money(rng, 30, 60):.2f}",
-                    f"Registrant: {SHOP}"]), H_ADMIN),
+                    f"Registrant: {SHOP}"]), H_TECH),
         ("google workspace admin notes.txt",
          f"Users: {OWNER_EMAIL}, {SHOP_EMAIL} (shared), priya@ (alias)\n"
          "Storage: 30GB each, Mel at 80%. Move photos to Drive shared "
-         "folder.\n", H_ADMIN),
+         "folder.\n", H_TECH),
     ]
     return rng.choice(pool)
 
@@ -955,33 +959,33 @@ def travel_pool(rng):
          build_pdf(["E-TICKET ITINERARY", f"Passenger: {OWNER}",
                     f"MEL - SYD  {d} 07:15", f"SYD - MEL  {d} +3d 18:40",
                     "Baggage: 1x 23kg checked", "Booking ref: WBP7Q2"]),
-         H_ADMIN),
+         H_TRAVEL),
         (f"hotel confirmation {TRADE_FAIR.split()[0]} {y}.pdf",
          build_pdf(["BOOKING CONFIRMATION - Harbourside Stay",
                     f"Guest: {OWNER}", "3 nights, queen room",
                     f"Total ${money(rng, 700, 1100):.2f}",
-                    "Free cancellation until 48h before."]), H_ADMIN),
-        (f"trade fair costs {y}.xlsx", build_xlsx(cost_rows), H_ADMIN),
+                    "Free cancellation until 48h before."]), H_TRAVEL),
+        (f"trade fair costs {y}.xlsx", build_xlsx(cost_rows), H_TRAVEL),
         (f"trade fair notes {y}.md",
          f"# {TRADE_FAIR} {y}\n\n- 14 stockist leads, 3 solid "
          "(Adelaide, Hobart, Byron)\n- everyone asked about the bird "
          "series. Not ready. Take pre-orders next year.\n"
          "- stand next to a candle brand, good foot traffic\n"
-         "- do NOT bring the heavy risers again\n", H_ADMIN),
+         "- do NOT bring the heavy risers again\n", H_TRAVEL),
         ("packing list trade fair.txt",
          "- stand: banner, tablecloth, risers (light ones)\n"
          "- stock: 6 of each SKU + wrap rolls\n- price lists x50, "
          "order forms, pens\n- square reader + charger\n"
-         "- gaffer tape, zip ties, scissors\n- comfy shoes\n", H_ADMIN),
+         "- gaffer tape, zip ties, scissors\n- comfy shoes\n", H_TRAVEL),
         (f"christmas drinks {y}.md",
          f"# Xmas drinks\n\n- who: Mel, Priya, Graham, {ILLUSTRATOR}\n"
          "- where: the wine bar on Fenwick St, Thu after late night "
-         "trading\n- Priya gift: the good pen + a voucher\n", H_ADMIN),
+         "trading\n- Priya gift: the good pen + a voucher\n", H_TRAVEL),
         (f"{GUILD} conference {y}.pdf",
          build_pdf(["REGISTRATION CONFIRMED", GUILD,
                     f"Annual conference {y} - members day",
                     f"Attendee: {OWNER}", "Includes lunch and the "
-                    "wholesale panel."]), H_ADMIN),
+                    "wholesale panel."]), H_TRAVEL),
         (f"market run sheet {d}.txt",
          "5:30 load car\n6:15 bump in, gazebo up (ask the neighbour "
          "stall for a hand)\n7:00 float in the tin, reader on\n"
@@ -1001,61 +1005,61 @@ def people_pool(rng):
                      "Pay: award casual rate plus loading, paid weekly "
                      "on Wednesdays.",
                      "Either party may end the arrangement with one "
-                     "week's notice."]), H_ADMIN),
+                     "week's notice."]), H_PEOPLE),
         ("casual employment information statement.pdf",
          build_pdf(["CASUAL EMPLOYMENT INFORMATION STATEMENT",
                     "Employers must give this statement to every new "
                     "casual employee.", "Summary of casual conversion "
-                    "rights and where to get help."]), H_ADMIN),
+                    "rights and where to get help."]), H_PEOPLE),
         ("priya onboarding checklist.md",
          "# Priya - first week\n\n- [x] tax and super forms to Graham\n"
          "- [x] shared inbox login\n- [x] alarm walkthrough\n"
          "- [ ] Square reader training\n- [ ] packing standard "
-         "(photo of a good one on the wall)\n", H_ADMIN),
+         "(photo of a good one on the wall)\n", H_PEOPLE),
         (f"business plan {y}.docx",
          build_docx([f"{SHOP} - one page plan {y}",
                      "Goal: 40% of revenue from wholesale by end of year.",
                      "Focus: bird series launch, 10 new stockists, "
                      "move fulfilment to Fulfilo.",
                      "Stop: custom orders, markets more than twice a "
-                     "month."]), H_ADMIN),
+                     "month."]), H_PEOPLE),
         ("trademark application WATTLEBIRD PAPER CO.pdf",
          build_pdf(["TRADE MARK APPLICATION - RECEIPT",
                     "Mark: WATTLEBIRD PAPER CO (word)",
                     "Class 16: paper goods, stationery",
                     f"Applicant: {SHOP}", "Examination in 3-4 months."]),
-         H_ADMIN),
+         H_PEOPLE),
         (f"{GUILD} membership {y}.pdf",
          build_pdf(["MEMBERSHIP CONFIRMATION", GUILD,
                     f"Member: {SHOP}", f"Period: {y} calendar year",
                     "Includes mentoring program and trade fair "
-                    "discount."]), H_ADMIN),
+                    "discount."]), H_PEOPLE),
         (f"incident market gazebo {d}.md",
          f"# Incident {d}\n\nWind gust lifted the gazebo, leg came "
          "down on the neighbour's table. No injuries. Their stock "
          "fine, our risers cracked.\n\nTold the insurer same day. "
          "Claim number in the email. Buying proper weights.\n",
-         H_ADMIN),
+         H_PEOPLE),
         ("first aid kit contents.txt",
          "Kit lives under the packing bench.\n- bandaids (paper cuts, "
          "constantly)\n- burn gel (glue gun)\n- eye wash\n"
-         "- check expiry each July\n", H_ADMIN),
+         "- check expiry each July\n", H_PEOPLE),
         (f"accountant engagement letter {y}.pdf",
          build_pdf(["ENGAGEMENT LETTER", ACCOUNTANCY,
                     f"Client: {SHOP}", "Services: quarterly BAS, annual "
                     "return, payroll support.",
                     f"Fee: ${money(rng, 2200, 3600):.0f} per year plus "
-                    "GST."]), H_ADMIN),
+                    "GST."]), H_PEOPLE),
         ("privacy policy draft.docx",
          build_docx(["Privacy policy - draft",
                      f"{SHOP} collects your name, address and email to "
                      "fulfil orders.",
                      "We do not sell your data. Newsletter emails come "
                      "from Klaviyo and you can unsubscribe any time."]),
-         H_ADMIN),
+         H_PEOPLE),
         (f"volunteer market roster {y}.txt",
          "Saturdays:\n- 1st: Mel\n- 2nd: Priya\n- 3rd: Mel\n"
-         "- 4th: skip unless December\n", H_ADMIN),
+         "- 4th: skip unless December\n", H_PEOPLE),
     ]
     return rng.choice(pool)
 
