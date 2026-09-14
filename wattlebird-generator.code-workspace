@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    // Palette: one OKLCH hue, 95 (bright yellow). VS Code reads hex
+    // only, so the hex below is generated from the oklch() value in
+    // each comment. The title bar sits at the sRGB gamut edge, so its
+    // foreground is dark, not white. To change the theme, pick a new
+    // hue and convert all seven.
+    "workbench.colorCustomizations": {
+      "titleBar.activeBackground": "#fed400", // oklch(88% 0.185 95)
+      "titleBar.activeForeground": "#292101", // oklch(25% 0.050 95)
+      "titleBar.inactiveBackground": "#fae8a2", // oklch(93% 0.090 95)
+      "window.activeBorder": "#fed400", // oklch(88% 0.185 95)
+      "sideBar.background": "#fbf5df", // oklch(97% 0.030 95)
+      "commandCenter.background": "#f7dd7d", // oklch(90% 0.120 95)
+      "commandCenter.foreground": "#292101", // oklch(25% 0.050 95)
+      "commandCenter.debuggingBackground": "#f9efc960", // oklch(95% 0.050 95) + 60
+    },
+  },
+}
