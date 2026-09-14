@@ -19,16 +19,20 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import generate  # noqa: E402
+from tests.pngtext import png_text  # noqa: E402
 
 # A year, a year-month, or a full date, as the pools write them. A
 # financial year such as 2024-25 reads as the year 2024.
 DATE_RE = re.compile(r"20\d\d(?:-(?:0[1-9]|1[0-2])(?:-\d\d)?)?")
-# Images carry no text. Issue 1 covers them.
-NO_TEXT = {".png"}
+# Screenshots are stubs with no text, by design. Issue 1 covers them.
+def is_stub(p):
+    return p.suffix == ".png" and p.name.lower().startswith("screenshot")
 
 
 def visible_text(data):
     """Return the text an agent can find inside a generated file."""
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return "\n".join(png_text(data).values())
     if data[:2] == b"PK":
         with zipfile.ZipFile(BytesIO(data)) as z:
             return "".join(z.read(n).decode("utf-8", "replace")
@@ -43,7 +47,7 @@ class DatedBodies(unittest.TestCase):
         out = Path(cls.tmp.name) / "mess"
         generate.build_mess(out, seed=7)
         cls.files = [p for p in out.rglob("*")
-                     if p.is_file() and p.suffix not in NO_TEXT]
+                     if p.is_file() and not is_stub(p)]
         assert len(cls.files) > 300, "the mess is too small to test"
 
     @classmethod

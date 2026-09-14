@@ -60,7 +60,7 @@ supplier, customer and amount is invented.
   wholesale invoices (PDF), order and payout CSVs, stock and BAS
   spreadsheets (xlsx), wholesale price lists, emails (.eml), note
   archetypes (md and txt), documents (docx), admin PDFs, images (PNG
-  duotones), and zip "backups".
+  duotones with text fields), and zip "backups".
 - The rest of the business, in four pools: premises (lease, inspections,
   car logbook, PO box, fitout), technology (subscriptions, DNS, backups,
   a phishing email, a laptop receipt), travel and events (trade fair,
@@ -69,6 +69,10 @@ supplier, customer and amount is invented.
   pools exist so the mess is not only invoices and product photos. An
   agent that files into a business system should find work for its
   premises, technology, travel and people categories.
+- Product photos and marketing graphics carry PNG text fields: a
+  title, the product name and SKU, a date, and a camera or a program.
+  An agent that opens `IMG_8957.png` or `export.png` learns what the
+  image is. Screenshots carry no text, so an empty stub reads as junk.
 - Every binary opens for real. The script builds each PDF, xlsx and docx
   from scratch.
 - Filenames get light mess-ups: case, underscores, "copy", "download".
@@ -116,7 +120,9 @@ The tests build one mess in a temporary folder and check every file.
 They do not touch the committed answer key. A file whose name carries
 a year or a date must carry the same date in its body. Two files with
 different dates must never have identical bytes. Without that rule, a
-correct run archives the older years as duplicates.
+correct run archives the older years as duplicates. A product photo
+or a marketing graphic must carry a title in its PNG text fields. A
+screenshot must carry none.
 
 ## If the agent complains
 
