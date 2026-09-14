@@ -87,18 +87,24 @@ weekly to-do notes, which belong to no one category.
 ## Scoring
 
 ```sh
-python3 score.py answer-key.csv /path/to/filed-system sbs-map.csv
+python3 score.py answer-key.csv scoring-map.json \
+  --journal ~/.jd/journal.jsonl --root /path/to/the-mess
 ```
 
-`score.py` walks the filed system, or reads a text file of `ls -R`
-output, and matches each key file by basename. A map CSV says which
-two-digit categories count as correct for each label. `sbs-map.csv` is
-the map for the Small Business System. Write one map per system under
-test. The script also reports files parked in `.09 Archive` IDs and
-files it cannot find, and it lists every wrong placement.
+A Johnny.Decimal run leaves a journal: the JD CLI writes one line per
+move, with the source path and the ID. `score.py` joins each key row to
+its journal line by exact path, so every copy scores on its own, and a
+file with no line counts as left in place. For a run with no journal,
+pass `--listing` with the filed folder, or a text file of `ls -R`
+output. That mode matches by basename, and copies share one result, so
+it scores high.
 
-The key holds one row per copy, and duplicates share a basename, so a
-placed name scores every key row with that name.
+The map is JSON: each label to a list of two-digit categories that
+count as correct, or `"stays"` for a label the run must not file. The
+map encodes opinions about the system under test, so it lives with
+that system, not here. The Small Business System's map is in the
+johnnydecimal.com repo under `tests/fixtures/moving-in/`, next to a
+pinned copy of this key.
 
 ## If the agent complains
 

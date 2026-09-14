@@ -1,24 +1,30 @@
 #!/usr/bin/env python3
 """Score a filed system against the answer key.
 
-    python3 score.py KEY LISTING MAP
+    python3 score.py KEY MAP --journal JOURNAL --root MESS_ROOT
+    python3 score.py KEY MAP --listing FOLDER_OR_LS_R_FILE
 
 KEY      answer-key.csv from the generator run that made the mess.
-LISTING  the filed system: a folder to walk, or a text file that holds
-         `ls -R` output of it.
-MAP      a CSV with columns `label,categories`. `categories` is a
-         space-separated list of two-digit category numbers that count
-         as correct for that label, or the word `absent` when the file
-         must not be in the system at all. Ship one map per system
-         under test. See sbs-map.csv.
+MAP      JSON: each answer-key label to a list of two-digit categories
+         that count as correct, or the string "stays" for a label whose
+         files must not be filed at all. The map belongs with the system
+         under test, not with this generator.
 
-A file's destination is the first `NN.NN` ID folder on its path. Files
-are matched to the key by basename. A key file with no match in the
-listing is `missing`. The script does not know if a missing file was
-deleted or left behind, so read the source folder yourself.
+Journal mode is for a Johnny.Decimal run. The JD CLI writes one line per
+move to ~/.jd/journal.jsonl, with the source path and the ID. Each key
+row is joined to its journal line by exact path under MESS_ROOT, so
+copies with the same basename score separately, and a file with no line
+is "left" in place.
+
+Listing mode is for a run with no journal. It walks a folder, or reads a
+text file of `ls -R` output, and matches key rows by basename. A
+destination is the first `NN.NN` ID folder on the path. Copies with the
+same basename share one destination, so the score runs high.
 """
 
+import argparse
 import csv
+import json
 import os
 import re
 import sys
@@ -27,11 +33,42 @@ from pathlib import Path
 
 ID_RE = re.compile(r"(?:^|/)((\d\d)\.\d\d) [^/]*")
 SKIP = ("/JDex - ", "/.git/")
+STAYS = "stays"
+
+
+def load_map(path):
+    raw = json.loads(Path(path).read_text())
+    out = {}
+    for label, target in raw.items():
+        if target == STAYS:
+            out[label] = STAYS
+        elif isinstance(target, list) and all(
+            re.fullmatch(r"\d\d", t) for t in target
+        ):
+            out[label] = set(target)
+        else:
+            sys.exit(f"map: {label!r} must be a list of two-digit "
+                     f"categories or {STAYS!r}, got {target!r}")
+    return out
+
+
+def placements_from_journal(journal, root):
+    """Map key-relative path -> ID, from the JD CLI journal."""
+    root = str(Path(root).expanduser().resolve()).rstrip("/") + "/"
+    placed = {}
+    for line in Path(journal).expanduser().read_text().splitlines():
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        if entry.get("kind") != "file" or not entry["from"].startswith(root):
+            continue
+        placed.setdefault(entry["from"][len(root):], entry["id"])
+    return placed
 
 
 def placements_from_listing(listing):
-    """Map basename -> list of (category, id) from a folder or ls -R text."""
-    placed = defaultdict(list)
+    """Map basename -> ID, from a folder or ls -R text."""
+    placed = {}
 
     def add(path, name):
         if any(k in path for k in SKIP) or name == ".DS_Store":
@@ -39,13 +76,13 @@ def placements_from_listing(listing):
         ids = ID_RE.findall(path + "/")
         if not ids or re.match(r"^\d\d\.\d\d ", name):
             return
-        placed[name].append((ids[0][1], ids[0][0]))
+        placed.setdefault(name, ids[0][0])
 
     p = Path(listing)
     if p.is_dir():
-        for root, _, files in os.walk(p):
+        for r, _, files in os.walk(p):
             for f in files:
-                add(root, f)
+                add(r, f)
     else:
         cur = None
         for line in p.read_text(encoding="utf-8").splitlines():
@@ -56,55 +93,61 @@ def placements_from_listing(listing):
     return placed
 
 
-def main(argv):
-    if len(argv) != 3:
-        sys.exit(__doc__)
-    key_path, listing, map_path = argv
-    rows = list(csv.DictReader(open(key_path, newline="")))
-    cmap = {}
-    for r in csv.DictReader(open(map_path, newline="")):
-        cmap[r["label"]] = set(r["categories"].split())
-    placed = placements_from_listing(listing)
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("key")
+    ap.add_argument("map")
+    mode = ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--journal", help="the JD CLI journal.jsonl")
+    mode.add_argument("--listing", help="filed folder, or ls -R text")
+    ap.add_argument("--root", help="the mess folder the journal moved from")
+    args = ap.parse_args()
+    if args.journal and not args.root:
+        ap.error("--journal needs --root")
+
+    rows = list(csv.DictReader(open(args.key, newline="")))
+    cmap = load_map(args.map)
+    if args.journal:
+        placed = placements_from_journal(args.journal, args.root)
+        lookup = lambda r: r["file"]  # noqa: E731
+    else:
+        placed = placements_from_listing(args.listing)
+        lookup = lambda r: Path(r["file"]).name  # noqa: E731
 
     tally = defaultdict(Counter)
-    wrong, archived = [], Counter()
+    wrong, archived = [], 0
     for r in rows:
-        label, name = r["intended home"], Path(r["file"]).name
+        label = r["intended home"]
         want = cmap.get(label)
         if want is None:
             sys.exit(f"map has no row for label: {label}")
-        dests = placed.get(name, [])
-        if not dests:
-            tally[label]["correct" if "absent" in want else "missing"] += 1
+        id_ = placed.get(lookup(r))
+        if id_ is None:
+            tally[label]["correct" if want == STAYS else "left"] += 1
             continue
-        cat, id_ = dests[0]
         if id_.endswith(".09"):
-            archived[cat] += 1
-        if cat in want:
+            archived += 1
+        if want != STAYS and id_[:2] in want:
             tally[label]["correct"] += 1
         else:
             tally[label]["wrong"] += 1
             wrong.append((label, id_, r["file"]))
 
-    print(f"{'label':40} {'correct':>8} {'wrong':>6} {'missing':>8}")
+    print(f"{'label':40} {'correct':>8} {'wrong':>6} {'left':>6}")
     tot = Counter()
     for label in sorted(tally):
         t = tally[label]
         tot.update(t)
-        print(f"{label:40} {t['correct']:8d} {t['wrong']:6d} "
-              f"{t['missing']:8d}")
+        print(f"{label:40} {t['correct']:8d} {t['wrong']:6d} {t['left']:6d}")
     n = sum(tot.values())
-    print(f"{'TOTAL':40} {tot['correct']:8d} {tot['wrong']:6d} "
-          f"{tot['missing']:8d}")
+    print(f"{'TOTAL':40} {tot['correct']:8d} {tot['wrong']:6d} {tot['left']:6d}")
     print(f"\nscore: {tot['correct']}/{n} = {100 * tot['correct'] / n:.1f}%")
-    if archived:
-        print("\nfiles parked in a .09 Archive ID, by category:",
-              ", ".join(f"{c}: {k}" for c, k in sorted(archived.items())))
+    print(f"moved to a .09 archive ID: {archived}")
     if wrong:
         print("\nwrong placements:")
         for label, id_, f in sorted(wrong):
-            print(f"  {label:30} -> {id_}   {f}")
+            print(f"  {label:38} -> {id_}   {f}")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
