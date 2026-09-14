@@ -1,0 +1,80 @@
+> Written by Claude.
+
+# Wattlebird generator
+
+`generate.py` writes a fictional small online shop, Wattlebird Paper Co.,
+as a flat, messy, pre-Johnny.Decimal folder. Point an agent at the output
+and watch it file the mess into a Johnny.Decimal system. Then score the
+result against the answer key.
+
+Everything in the mess is invented. There is no personal data, and
+nothing in the output names Johnny.Decimal.
+
+## How to run
+
+```sh
+python3 generate.py /path/to/new-folder
+python3 generate.py /path/to/new-folder --seed 7
+```
+
+1. Give a folder that does not exist, or an empty one. The generator
+   refuses a folder with content in it.
+2. The generator writes about 480 files, under 1 MB, into that folder and
+   nothing else into it.
+3. The generator writes `answer-key.csv` beside itself.
+
+Python 3, standard library only. Same seed, same mess. The default seed
+is 2552, and the committed `answer-key.csv` is the key for that seed. A
+run with another seed rewrites it. Restore the committed key with
+`git checkout answer-key.csv` when you are done, or commit the new key
+and name the seed that made it.
+
+Never write the mess inside this folder. The agent under test must not
+be able to read the answer key. The generator refuses an output folder
+inside its own folder for that reason.
+
+## Like-for-like comparisons
+
+Every arm of one comparison, for example PARA against SBS, or MCP
+against no MCP, must organize the same seed's mess. Change the seed
+between videos, never between arms.
+
+## The world
+
+One consistent cast, defined at the top of the script: the owner, a
+part-timer, an accountant, six suppliers, two stockists, nine SKUs.
+Every file draws from this cast, so cross-references line up. That
+consistency is what makes an organizing agent believe the mess.
+
+Real generic services are named: Shopify, Etsy, AusPost. Every person,
+supplier, customer and amount is invented.
+
+## File classes
+
+- Hero notes: about 18 individually written notes, such as ideas,
+  decisions, checklists, and two personal strays. These give the mess
+  its character. Add more here first if the mess feels sterile.
+- Volume classes with seeded variation: supplier invoices (PDF), own
+  wholesale invoices (PDF), order and payout CSVs, stock and BAS
+  spreadsheets (xlsx), wholesale price lists, emails (.eml), note
+  archetypes (md and txt), documents (docx), admin PDFs, images (PNG
+  duotones), and zip "backups".
+- Every binary opens for real. The script builds each PDF, xlsx and docx
+  from scratch.
+- Filenames get light mess-ups: case, underscores, "copy", "download".
+  About 12% of files are duplicates with drift.
+
+## The answer key
+
+`answer-key.csv` has one row per generated file. The `intended home`
+column holds the file's label: Suppliers & purchasing, Sales & orders,
+Money, tax, & accounting, Products & stock, Marketing & website, Business
+admin, Personal (not business), or Junk / discardable. A scoring map from
+label to system category belongs with the system under test, not here.
+
+## If the agent complains
+
+- "Files feel templated": add hero notes, widen the variation pools.
+- "Amounts do not add up": they are independent random draws. If an agent
+  starts to cross-check invoice totals against payouts, generate them
+  from one ledger instead.
