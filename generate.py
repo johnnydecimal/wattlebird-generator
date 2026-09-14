@@ -274,11 +274,11 @@ PALETTES = [
 def build_png(rng, text=None):
     """A duotone PNG of a few hundred bytes.
 
-    `text` is {keyword: value} for one tEXt chunk per field, written
-    between IHDR and IDAT. Keywords are the standard ones: Title,
-    Author, Description, Creation Time, Software, Source, Comment.
-    An agent that reads inside the file finds them. No `text` makes a
-    bare stub, which is the right signal for a junk screenshot.
+    `text` is {keyword: value}. The function writes one text field per
+    entry, as a tEXt chunk between IHDR and IDAT. Keywords are the
+    standard ones: Title, Author, Description, Creation Time, Software,
+    Source, Comment. An agent that reads inside the file finds them.
+    No `text` makes a bare stub, the right signal for a junk screenshot.
     """
     w, h = rng.choice([(1200, 900), (900, 1200), (1080, 1080), (1600, 900),
                        (800, 600)])
@@ -808,7 +808,7 @@ DESIGN_APPS = ["Canva", "Adobe Illustrator 28.0", "Adobe Photoshop 25.0"]
 def image_pool(rng):
     """One image: a product photo, a marketing graphic, or a screenshot.
 
-    Photos and graphics carry tEXt fields, so an agent that opens
+    Photos and graphics carry text fields, so an agent that opens
     IMG_8957.png or export.png still learns what the image is.
     Screenshots carry nothing.
     """
@@ -819,46 +819,44 @@ def image_pool(rng):
     season = rng.choice(["summer", "xmas", "launch"])
     campaign = {"summer": "summer sale", "xmas": "Christmas",
                 "launch": "new range launch"}[season]
-    photo = f"{pname} ({sku})"
+    label = f"{pname} ({sku})"
+    camera = rng.choice(CAMERAS)
+    photo_app = rng.choice(PHOTO_APPS)
+    design_app = rng.choice(DESIGN_APPS)
+
+    def fields(title, description):
+        return {"Title": title, "Author": OWNER, "Description": description,
+                "Creation Time": when}
 
     def shot(name, description):
-        return (name, H_PRODUCT, {
-            "Title": pname,
-            "Author": OWNER,
-            "Description": description,
-            "Creation Time": when,
-            "Source": rng.choice(CAMERAS),
-            "Software": rng.choice(PHOTO_APPS),
-        })
+        return (name, H_PRODUCT, {**fields(pname, description),
+                                  "Source": camera, "Software": photo_app})
 
     def graphic(name, title, description):
-        return (name, H_MARKETING, {
-            "Title": title,
-            "Author": OWNER,
-            "Description": description,
-            "Creation Time": when,
-            "Software": rng.choice(DESIGN_APPS),
-        })
+        return (name, H_MARKETING, {**fields(title, description),
+                                    "Software": design_app})
 
     pool = [
-        shot(f"{slug}.png", f"Product photo, {photo}, for the {SHOP} web store."),
-        shot(f"{slug}-2.png", f"Product photo, {photo}, second angle."),
+        shot(f"{slug}.png",
+             f"Product photo, {label}, for the {SHOP} web store."),
+        shot(f"{slug}-2.png", f"Product photo, {label}, second angle."),
         shot(f"{sku} white bg.png",
-             f"Product cutout on white, {photo}, for the {SHOP} web store."),
+             f"Product cutout on white, {label}, for the {SHOP} web store."),
         shot(f"IMG_{rng.randint(1000, 9899)}.png",
-             f"Product photo, {photo}, on the {SHOP} studio bench."),
+             f"Product photo, {label}, on the {SHOP} studio bench."),
         shot(f"{slug} FINAL.png",
-             f"Product photo, {photo}, final edit for the listing."),
+             f"Product photo, {label}, final edit for the listing."),
         shot(f"{slug} final (use this).png",
-             f"Product photo, {photo}, final edit for the listing."),
+             f"Product photo, {label}, final edit for the listing."),
         shot("market stall pic.png",
-             f"{SHOP} market stall with the range on display, {photo} in front."),
+             f"{SHOP} market stall with the range on display, "
+             f"{label} in front."),
         shot(f"flatlay {rng.randint(1, 30)}.png",
-             f"Flat lay, {photo}, for the product page."),
+             f"Flat lay, {label}, for the product page."),
         graphic(f"banner {season}.png", f"{campaign.capitalize()} banner",
                 f"{SHOP} web store hero banner for the {campaign} campaign."),
         graphic(f"insta {d}.png", f"Instagram post {d}",
-                f"{SHOP} Instagram post, {photo}, {campaign} campaign."),
+                f"{SHOP} Instagram post, {label}, {campaign} campaign."),
         graphic("logo old.png", f"{SHOP} logo (old)",
                 f"{SHOP} logo artwork, old version, retired."),
         graphic("logo new v3.png", f"{SHOP} logo",

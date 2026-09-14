@@ -3,8 +3,8 @@
 Issue 1: every PNG was a duotone stub of a few hundred bytes. With a
 name like IMG_8957.png or export.png, an agent that reads inside files
 found nothing, and 32 of 96 images stayed in the mess. Now each product
-photo and marketing image carries PNG tEXt fields: a title, a
-description, a date, and a device or a program. Screenshots stay empty,
+photo and marketing graphic carries PNG text fields: a title, a
+description, a date, and a camera or a program. Screenshots stay empty,
 because "tiny and empty" is the right signal for junk.
 """
 
@@ -102,9 +102,9 @@ class ImagesInTheMess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.TemporaryDirectory()
-        out = Path(cls.tmp.name) / "mess"
-        cls.key = dict(generate.build_mess(out, seed=7))
-        cls.images = [p for p in out.rglob("*.png")]
+        cls.out = Path(cls.tmp.name) / "mess"
+        cls.key = dict(generate.build_mess(cls.out, seed=7))
+        cls.images = list(cls.out.rglob("*.png"))
         assert len(cls.images) > 80, "too few images to test"
 
     @classmethod
@@ -114,7 +114,7 @@ class ImagesInTheMess(unittest.TestCase):
     def test_every_image_but_a_screenshot_carries_a_title(self):
         empty = []
         for p in self.images:
-            home = self.key[str(p.relative_to(self.tmp.name + "/mess"))]
+            home = self.key[str(p.relative_to(self.out))]
             text = png_text(p.read_bytes())
             if home == generate.H_JUNK:
                 self.assertEqual(text, {}, p.name)

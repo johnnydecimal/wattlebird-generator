@@ -24,9 +24,6 @@ from tests.pngtext import png_text  # noqa: E402
 # A year, a year-month, or a full date, as the pools write them. A
 # financial year such as 2024-25 reads as the year 2024.
 DATE_RE = re.compile(r"20\d\d(?:-(?:0[1-9]|1[0-2])(?:-\d\d)?)?")
-# Screenshots are stubs with no text, by design. Issue 1 covers them.
-def is_stub(p):
-    return p.suffix == ".png" and p.name.lower().startswith("screenshot")
 
 
 def visible_text(data):
@@ -45,9 +42,11 @@ class DatedBodies(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.TemporaryDirectory()
         out = Path(cls.tmp.name) / "mess"
-        generate.build_mess(out, seed=7)
-        cls.files = [p for p in out.rglob("*")
-                     if p.is_file() and not is_stub(p)]
+        # A junk PNG is a screenshot: a stub with no text, by design.
+        key = generate.build_mess(out, seed=7)
+        cls.files = [out / path for path, home in key
+                     if not (path.endswith(".png")
+                             and home == generate.H_JUNK)]
         assert len(cls.files) > 300, "the mess is too small to test"
 
     @classmethod
