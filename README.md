@@ -106,6 +106,18 @@ that system, not here. The Small Business System's map is in the
 johnnydecimal.com repo under `tests/fixtures/moving-in/`, next to a
 pinned copy of this key.
 
+## Tests
+
+```sh
+python3 -m unittest
+```
+
+The tests build one mess in a temporary folder and check every file.
+They do not touch the committed answer key. A file whose name carries
+a year or a date must carry the same date in its body. Two files with
+different dates must never have identical bytes. Without that rule, a
+correct run archives the older years as duplicates.
+
 ## If the agent complains
 
 - "Files feel templated": add hero notes, widen the variation pools.
@@ -114,5 +126,5 @@ pinned copy of this key.
   from one ledger instead.
 - "Everything lands in finance": supplier invoices are bills, so a
   business system files them under money. That is correct, not a fault.
-  Raise the four pool counts in `main()` if the other categories still
-  look thin.
+  Raise the four pool counts in `build_mess()` if the other categories
+  still look thin.

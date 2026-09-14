@@ -384,11 +384,13 @@ def supplier_invoice_pdf(rng, supplier):
 
 def orders_csv(rng):
     d = a_date(rng, 2023, 2026)
+    y = int(d[:4])
     rows = ["Order,Date,Customer,Items,Total,Fulfilment"]
-    for _ in range(rng.randint(12, 40)):
+    for i in range(rng.randint(12, 40)):
         sku, pname, price = rng.choice(PRODUCTS)
         qty = rng.randint(1, 3)
-        rows.append(f"{order_id(rng)},{a_date(rng)},{customer(rng)},"
+        when = d if i == 0 else a_date(rng, y, y)
+        rows.append(f"{order_id(rng)},{when},{customer(rng)},"
                     f"{qty}x {pname},{qty * price:.2f},"
                     f"{rng.choice(['shipped', 'shipped', 'pending'])}")
     fname = rng.choice([
@@ -400,11 +402,13 @@ def orders_csv(rng):
 
 def payouts_csv(rng):
     d = a_date(rng, 2023, 2026)
+    y = int(d[:4])
     rows = ["Payout date,Gross,Fees,Net"]
-    for _ in range(rng.randint(6, 14)):
+    for i in range(rng.randint(6, 14)):
         gross = money(rng, 180, 2600)
         fees = round(gross * 0.029 + 0.30, 2)
-        rows.append(f"{a_date(rng)},{gross:.2f},{fees:.2f},"
+        when = d if i == 0 else a_date(rng, y, y)
+        rows.append(f"{when},{gross:.2f},{fees:.2f},"
                     f"{gross - fees:.2f}")
     fname = rng.choice([f"payouts_{d[:7]}.csv", "shopify_payouts.csv",
                         f"payouts export {d}.csv"])
@@ -412,11 +416,12 @@ def payouts_csv(rng):
 
 
 def stock_xlsx(rng):
-    rows = [["SKU", "Product", "On hand", "Reorder at", "Reordered?"]]
+    d = a_date(rng, 2023, 2026)
+    rows = [["Stocktake", d, "", "", ""],
+            ["SKU", "Product", "On hand", "Reorder at", "Reordered?"]]
     for sku, pname, _ in PRODUCTS:
         rows.append([sku, pname, rng.randint(0, 240), 25,
                      rng.choice(["", "", "yes", "ordered w Corella"])])
-    d = a_date(rng, 2023, 2026)
     fname = rng.choice([f"stocktake {d}.xlsx", "stock levels.xlsx",
                         f"stock {d[:7]} DO NOT EDIT.xlsx",
                         "stocktake NEW.xlsx"])
@@ -575,7 +580,7 @@ def note_pool(rng):
     d = a_date(rng, 2023, 2026)
     pool = [
         (f"todo week of {d}.md",
-         f"# To do\n\n- [ ] pack orders (Mon + Wed)\n"
+         f"# To do - week of {d}\n\n- [ ] pack orders (Mon + Wed)\n"
          f"- [ ] chase {sup[0]} about {sup[1]}\n"
          f"- [ ] reorder {pname} — down to {rng.randint(3, 20)}\n"
          f"- [ ] reply to wholesale enquiry\n- [x] payout export "
@@ -587,16 +592,16 @@ def note_pool(rng):
          f"ask about 500 pricing.\nLead time {rng.randint(3, 7)} weeks — "
          f"order by end of month for Christmas.\n", H_PRODUCT),
         (f"market day notes {d}.txt",
-         f"Market takings ${rng.randint(300, 1400)}.\n"
+         f"Market {d}. Takings ${rng.randint(300, 1400)}.\n"
          f"{pname} sold out by lunch. People kept asking for gift "
          f"wrapping.\nPriya idea: bundle pen + notebook, "
          f"call it the desk set.\n", H_MARKETING),
         (f"instagram plan {d[:7]}.md",
-         "# IG plan\n\n- Mon: flatlay new range\n- Wed: behind the "
+         f"# IG plan {d[:7]}\n\n- Mon: flatlay new range\n- Wed: behind the "
          "scenes packing\n- Fri: customer photo repost\n\nStop posting "
          "at 9pm, engagement dead.\n", H_MARKETING),
         (f"call with {ACCOUNTANT.split()[0]} {d}.md",
-         f"# Call w {ACCOUNTANT}\n\n- keep Fulfilo invoices separate, "
+         f"# Call w {ACCOUNTANT} {d}\n\n- keep Fulfilo invoices separate, "
          "GST treatment differs on storage vs pick-pack\n- super due "
          "for Priya by the 28th\n- consider monthly IAS next year\n",
          H_MONEY),
@@ -606,13 +611,14 @@ def note_pool(rng):
          f"- product photos for {pname} still the old ones\n",
          H_MARKETING),
         (f"mentor session {d}.md",
-         f"# Mentor session\n\n- {GUILD} mentor: stop discounting, "
+         f"# Mentor session {d}\n\n- {GUILD} mentor: stop discounting, "
          "raise wholesale minimum\n- 'you are a brand, not a printer'\n"
          f"- homework: write the one-page plan, send by {d[:7]}\n",
          H_PEOPLE),
         (f"studio to do {d}.txt",
-         f"- fix the wobbly shelf near the door\n- new globe in the "
-         "packing area (LED, warm)\n- ask landlord about the bike rack\n"
+         f"Studio, {d}\n\n- fix the wobbly shelf near the door\n"
+         "- new globe in the packing area (LED, warm)\n"
+         "- ask landlord about the bike rack\n"
          f"- pest guy? saw a moth near the {pname} stock\n", H_PREMISES),
     ]
     return rng.choice(pool)
@@ -723,7 +729,7 @@ def docx_pool(rng):
           "we know by name.",
           "We make notebooks you'll actually finish."], H_MARKETING),
         (f"letter to landlord {d[:4]}.docx",
-         ["Dear Property Manager,",
+         [d, "Dear Property Manager,",
           "Please find attached our renewal for the studio unit. We "
           "note the proposed increase and refer to comparable listings.",
           f"Regards, {OWNER}"], H_PREMISES),
@@ -736,10 +742,10 @@ def docx_pool(rng):
           "Payment 14 days from invoice. RRP as per price list."],
          H_ORDERS),
         (f"grant application draft {d[:4]}.docx",
-         ["Small business grant application - draft.",
+         [f"Small business grant application - draft, {d}.",
           f"{SHOP} employs 1.4 FTE and manufactures locally.",
-          "Funds would purchase a creasing machine to bring card "
-          "finishing in-house."], H_MONEY),
+          f"Funds requested: ${money(rng, 4000, 12000):.0f} for a "
+          "creasing machine to bring card finishing in-house."], H_MONEY),
     ]
     name, paragraphs, home = rng.choice(pool)
     return name, build_docx(paragraphs), home
@@ -751,7 +757,9 @@ def admin_pdf_pool(rng):
         (f"insurance certificate {d[:4]}.pdf",
          ["CERTIFICATE OF CURRENCY",
           f"Insured: {SHOP}", "Product & Public Liability $10,000,000",
-          f"Period: {d[:4]}-07-01 to {int(d[:4]) + 1}-06-30"], H_PEOPLE),
+          f"Period: {d[:4]}-07-01 to {int(d[:4]) + 1}-06-30",
+          f"Policy WBP{rng.randint(100000, 999999)}, issued {d}"],
+         H_PEOPLE),
         ("studio lease excerpt.pdf",
          ["COMMERCIAL LEASE (EXCERPT)",
           f"Tenant: {SHOP}", "Premises: Unit 7, 12 Fenwick St",
@@ -759,13 +767,16 @@ def admin_pdf_pool(rng):
         (f"asic renewal {d[:4]}.pdf",
          ["ANNUAL COMPANY STATEMENT",
           f"Company: Wattlebird Paper Co Pty Ltd",
+          f"Statement date: {d}. Reference {rng.randint(10**8, 10**9)}",
           "Review fee payable. Check details and pay by the due "
           "date."], H_PEOPLE),
         (f"receipt bunnings {d}.pdf",
-         ["TAX RECEIPT", "Shelving unit x2, cable ties, hooks",
+         ["TAX RECEIPT", f"Date {d}  Receipt {rng.randint(10**6, 10**7)}",
+          "Shelving unit x2, cable ties, hooks",
           f"Total ${money(rng, 40, 260):.2f} inc GST"], H_MONEY),
         (f"receipt officeworks {d}.pdf",
-         ["TAX RECEIPT", "Label rolls x6, A4 paper, markers",
+         ["TAX RECEIPT", f"Date {d}  Receipt {rng.randint(10**6, 10**7)}",
+          "Label rolls x6, A4 paper, markers",
           f"Total ${money(rng, 30, 140):.2f} inc GST"], H_MONEY),
     ]
     name, lines, home = rng.choice(pool)
@@ -805,7 +816,8 @@ def image_pool(rng):
 def premises_pool(rng):
     d = a_date(rng, 2022, 2026)
     fy = f"{d[:4]}-{str(int(d[:4]) + 1)[2:]}"
-    log_rows = [["Date", "From", "To", "km", "Purpose"]]
+    log_rows = [["Car logbook", fy, "", "", ""],
+                ["Date", "From", "To", "km", "Purpose"]]
     for _ in range(rng.randint(6, 14)):
         trip = rng.choice([
             ("studio", "Corella Print Co", 14, "pick up print run"),
@@ -819,12 +831,13 @@ def premises_pool(rng):
         (f"car logbook {fy}.xlsx", build_xlsx(log_rows), H_PREMISES),
         (f"PO Box renewal {d[:4]}.pdf",
          build_pdf(["PO BOX RENEWAL NOTICE", f"Customer: {SHOP}",
-                    "PO Box 214, Fenwick St LPO",
+                    "PO Box 214, Fenwick St LPO", f"Notice date: {d}",
                     f"Renewal fee ${money(rng, 140, 190):.2f} inc GST",
                     "Renew before the expiry date to keep the box."]),
          H_PREMISES),
         (f"parking infringement {d}.pdf",
          build_pdf(["INFRINGEMENT NOTICE", COUNCIL,
+                    f"Notice {rng.randint(10**7, 10**8)}, offence date {d}",
                     "Offence: parked in loading zone longer than 30 min",
                     f"Location: Fenwick St", f"Penalty ${rng.choice([99, 121, 165])}.00",
                     "Pay or appeal within 28 days."]), H_PREMISES),
@@ -851,19 +864,27 @@ def premises_pool(rng):
         (f"studio inspection report {d}.pdf",
          build_pdf(["ROUTINE INSPECTION REPORT", LANDLORD,
                     f"Premises: {STUDIO}", f"Tenant: {SHOP}",
+                    f"Inspection date: {d}",
                     "Condition: good. Minor: shelving fixed to wall, "
                     "tenant to patch on exit.",
                     "Next inspection in 6 months."]), H_PREMISES),
         (f"electricity bill studio {d[:7]}.pdf",
          build_pdf(["TAX INVOICE - Southern Volt Energy",
+                    f"Invoice {rng.randint(10**7, 10**8)}, issued {d}",
+                    f"Billing month {d[:7]}",
                     f"Supply address: {STUDIO}",
                     f"Usage {rng.randint(180, 620)} kWh",
                     f"Amount due ${money(rng, 90, 340):.2f}",
                     "Due in 14 days."]), H_MONEY),
         (f"{TRADERS_GROUP} newsletter {d[:7]}.docx",
-         build_docx([f"{TRADERS_GROUP} - monthly update",
-                     "Council has approved the street planters. Late "
-                     "night trading dates are confirmed for December.",
+         build_docx([f"{TRADERS_GROUP} - update for {d[:7]}",
+                     rng.choice([
+                         "Council has approved the street planters. Late "
+                         "night trading dates are confirmed for December.",
+                         "The bin collection moves to Tuesday from next "
+                         "month. Put them out the night before.",
+                         "Footpath dining permits renew in July. See the "
+                         "council link in the members area."]),
                      "New member: a ceramics studio at number 18."]),
          H_PREMISES),
         ("label printer setup.md",
@@ -882,12 +903,14 @@ def tech_pool(rng):
         sub_rows.append([svc, use, cost,
                          rng.choice(["monthly", "annual"]),
                          rng.choice([OWNER_EMAIL, SHOP_EMAIL])])
-    stat_rows = [["Campaign", "Sent", "Opens", "Clicks", "Unsubs"]]
+    stat_rows = [["Campaign", "Sent on", "Sent", "Opens", "Clicks",
+                  "Unsubs"]]
     for c in rng.sample(["New range launch", "Christmas last post dates",
                          "Market this Saturday", "Refills are back",
                          "Bird series preview", "Stockist spotlight"], k=4):
         sent = rng.randint(800, 2600)
-        stat_rows.append([c, sent, rng.randint(200, sent // 2),
+        stat_rows.append([c, f"{d[:7]}-{rng.randint(1, 28):02d}", sent,
+                          rng.randint(200, sent // 2),
                           rng.randint(10, 120), rng.randint(0, 9)])
     pool = [
         ("software subscriptions.xlsx", build_xlsx(sub_rows), H_TECH),
@@ -909,6 +932,7 @@ def tech_pool(rng):
          H_TECH),
         (f"laptop receipt {d}.pdf",
          build_pdf(["TAX INVOICE - Byte Bros Computers",
+                    f"Invoice BB{rng.randint(10**5, 10**6)}  Date {d}",
                     f"Sold to: {SHOP}", "1x 13in laptop, 16GB, 512GB",
                     "1x USB-C dock", f"Total ${money(rng, 1900, 2600):.2f}"
                     " inc GST", "Warranty: 12 months manufacturer"]),
@@ -935,6 +959,7 @@ def tech_pool(rng):
          H_TECH),
         (f"domain renewal receipt {d[:4]}.pdf",
          build_pdf(["RECEIPT", "wattlebirdpaper.com.au - 2 year renewal",
+                    f"Paid {d}  Receipt {rng.randint(10**6, 10**7)}",
                     f"Amount ${money(rng, 30, 60):.2f}",
                     f"Registrant: {SHOP}"]), H_TECH),
         ("google workspace admin notes.txt",
@@ -948,7 +973,8 @@ def tech_pool(rng):
 def travel_pool(rng):
     y = rng.randint(2023, 2026)
     d = a_date(rng, y, y)
-    cost_rows = [["Item", "AUD", "Paid", "Notes"],
+    cost_rows = [[f"{TRADE_FAIR} {y}", "", "", ""],
+                 ["Item", "AUD", "Paid", "Notes"],
                  ["Stand fee 3x3", money(rng, 1800, 2600), "yes", "early bird"],
                  ["Flights MEL-SYD x2", money(rng, 380, 620), "yes", ""],
                  ["Hotel 3 nights", money(rng, 700, 1100), "yes", "Harbourside Stay"],
@@ -962,7 +988,8 @@ def travel_pool(rng):
          H_TRAVEL),
         (f"hotel confirmation {TRADE_FAIR.split()[0]} {y}.pdf",
          build_pdf(["BOOKING CONFIRMATION - Harbourside Stay",
-                    f"Guest: {OWNER}", "3 nights, queen room",
+                    f"Confirmation {rng.randint(10**7, 10**8)}",
+                    f"Guest: {OWNER}", f"Check-in {d}, 3 nights, queen room",
                     f"Total ${money(rng, 700, 1100):.2f}",
                     "Free cancellation until 48h before."]), H_TRAVEL),
         (f"trade fair costs {y}.xlsx", build_xlsx(cost_rows), H_TRAVEL),
@@ -978,7 +1005,7 @@ def travel_pool(rng):
          "order forms, pens\n- square reader + charger\n"
          "- gaffer tape, zip ties, scissors\n- comfy shoes\n", H_TRAVEL),
         (f"christmas drinks {y}.md",
-         f"# Xmas drinks\n\n- who: Mel, Priya, Graham, {ILLUSTRATOR}\n"
+         f"# Xmas drinks {y}\n\n- who: Mel, Priya, Graham, {ILLUSTRATOR}\n"
          "- where: the wine bar on Fenwick St, Thu after late night "
          "trading\n- Priya gift: the good pen + a voucher\n", H_TRAVEL),
         (f"{GUILD} conference {y}.pdf",
@@ -987,8 +1014,8 @@ def travel_pool(rng):
                     f"Attendee: {OWNER}", "Includes lunch and the "
                     "wholesale panel."]), H_TRAVEL),
         (f"market run sheet {d}.txt",
-         "5:30 load car\n6:15 bump in, gazebo up (ask the neighbour "
-         "stall for a hand)\n7:00 float in the tin, reader on\n"
+         f"Market {d}\n\n5:30 load car\n6:15 bump in, gazebo up (ask the "
+         "neighbour stall for a hand)\n7:00 float in the tin, reader on\n"
          "14:00 pack down\n", H_MARKETING),
     ]
     return rng.choice(pool)
@@ -1045,8 +1072,9 @@ def people_pool(rng):
          "constantly)\n- burn gel (glue gun)\n- eye wash\n"
          "- check expiry each July\n", H_PEOPLE),
         (f"accountant engagement letter {y}.pdf",
-         build_pdf(["ENGAGEMENT LETTER", ACCOUNTANCY,
-                    f"Client: {SHOP}", "Services: quarterly BAS, annual "
+         build_pdf(["ENGAGEMENT LETTER", ACCOUNTANCY, f"Dated {d}",
+                    f"Client: {SHOP}", f"Period: financial year ending "
+                    f"30 June {y}.", "Services: quarterly BAS, annual "
                     "return, payroll support.",
                     f"Fee: ${money(rng, 2200, 3600):.0f} per year plus "
                     "GST."]), H_PEOPLE),
@@ -1058,7 +1086,7 @@ def people_pool(rng):
                      "from Klaviyo and you can unsubscribe any time."]),
          H_PEOPLE),
         (f"volunteer market roster {y}.txt",
-         "Saturdays:\n- 1st: Mel\n- 2nd: Priya\n- 3rd: Mel\n"
+         f"Saturdays {y}:\n- 1st: Mel\n- 2nd: Priya\n- 3rd: Mel\n"
          "- 4th: skip unless December\n", H_PEOPLE),
     ]
     return rng.choice(pool)
@@ -1143,12 +1171,33 @@ def main():
         sys.exit("The output folder must not hold the fixture folder or "
                  "sit inside it: the answer key must never sit inside "
                  "the mess.")
-    rng = random.Random(seed)
-
-    out.mkdir(parents=True, exist_ok=True)
     print(f"Output folder: {out}  (seed {seed})")
+    key = build_mess(out, seed)
 
-    key = []  # (output path, intended home)
+    with open(TOOL_DIR / "answer-key.csv", "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["file", "intended home"])
+        w.writerows(sorted(key))
+
+    total = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
+    n_files = sum(1 for p in out.rglob("*") if p.is_file())
+    print(f"  files:      {n_files}")
+    print(f"  total size: {total / 1048576:.1f} MB")
+    print(f"Answer key: {TOOL_DIR / 'answer-key.csv'}")
+    if seed != DEFAULT_SEED:
+        print(f"  note: the answer key now holds seed {seed}, not the "
+              f"committed default {DEFAULT_SEED}. See README.md.")
+
+
+def build_mess(out, seed):
+    """Write the mess into the folder `out`. Return the answer key rows.
+
+    Each row is (path relative to `out`, intended home). The caller
+    writes the key file, so a test run never touches the committed key.
+    """
+    rng = random.Random(seed)
+    out.mkdir(parents=True, exist_ok=True)
+    key = []
 
     def place(name, data, home, mangled=True):
         n = mangle(name, rng) if mangled else name
@@ -1184,27 +1233,14 @@ def main():
 
     # A couple of zip "backups"
     for label in ["website backup", "old shop files"]:
-        texts = [(f"notes/{i}.txt", f"archived note {i}\n")
+        y = rng.randint(2022, 2024)
+        texts = [(f"notes/{i}.txt", f"archived note {i} from {y}\n")
                  for i in range(rng.randint(3, 6))]
-        place(f"{label} {rng.randint(2022, 2024)}.zip",
-              build_zip_backup(rng, texts), H_JUNK)
+        place(f"{label} {y}.zip", build_zip_backup(rng, texts), H_JUNK)
 
     for junk in EMPTY_JUNK_DIRS:
         (out / junk).mkdir(parents=True, exist_ok=True)
-
-    with open(TOOL_DIR / "answer-key.csv", "w", newline="") as f:
-        w = csv.writer(f, lineterminator="\n")
-        w.writerow(["file", "intended home"])
-        w.writerows(sorted(key))
-
-    total = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
-    n_files = sum(1 for p in out.rglob("*") if p.is_file())
-    print(f"  files:      {n_files}")
-    print(f"  total size: {total / 1048576:.1f} MB")
-    print(f"Answer key: {TOOL_DIR / 'answer-key.csv'}")
-    if seed != DEFAULT_SEED:
-        print(f"  note: the answer key now holds seed {seed}, not the "
-              f"committed default {DEFAULT_SEED}. See README.md.")
+    return key
 
 
 if __name__ == "__main__":
